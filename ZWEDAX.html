@@ -1,0 +1,1548 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ZWEDAX Webhook Spammer</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        :root {
+            --primary: #ff0000;
+            --primary-dark: #cc0000;
+            --secondary: #5865f2;
+            --secondary-dark: #4752c4;
+            --bg: #0a0a0a;
+            --card-bg: #1a1a1a;
+            --text: #ffffff;
+            --text-secondary: #b0b0b0;
+            --border: #333333;
+            --success: #00ff00;
+            --danger: #ff3333;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #0a0a0a 0%, #1a1a1a 50%, #0a0a0a 100%);
+            color: var(--text);
+            line-height: 1.6;
+            min-height: 100vh;
+            padding: 1rem;
+            background-attachment: fixed;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        header {
+            text-align: center;
+            margin-bottom: 2rem;
+            padding-top: 1rem;
+        }
+
+        h1 {
+            font-size: 3rem;
+            font-weight: 900;
+            background: linear-gradient(90deg, #ff0000, #5865f2);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            margin-bottom: 0.5rem;
+            text-shadow: 0 0 20px rgba(255, 0, 0, 0.3);
+        }
+
+        .subtitle {
+            color: var(--text-secondary);
+            font-size: 1.2rem;
+            font-weight: 300;
+        }
+
+        .tabs-container {
+            display: flex;
+            background: rgba(26, 26, 26, 0.8);
+            border-radius: 15px;
+            padding: 0.5rem;
+            margin-bottom: 2rem;
+            border: 1px solid var(--border);
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
+            overflow-x: auto;
+            flex-wrap: wrap;
+        }
+
+        .tab {
+            flex: 1;
+            min-width: 150px;
+            text-align: center;
+            padding: 1rem 1.5rem;
+            cursor: pointer;
+            border-radius: 12px;
+            font-weight: 600;
+            transition: all 0.3s;
+            color: var(--text-secondary);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 0.5rem;
+            white-space: nowrap;
+        }
+
+        .tab:hover {
+            background: rgba(88, 101, 242, 0.1);
+            color: #5865f2;
+        }
+
+        .tab.active {
+            background: linear-gradient(135deg, #ff0000, #cc0000);
+            color: white;
+            box-shadow: 0 4px 10px rgba(255, 0, 0, 0.3);
+        }
+
+        .tab-content {
+            display: none;
+            animation: fadeIn 0.3s ease;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .tab-content.active {
+            display: block;
+        }
+
+        .card {
+            background: rgba(26, 26, 26, 0.9);
+            border-radius: 15px;
+            padding: 2rem;
+            border: 1px solid var(--border);
+            box-shadow: 0 8px 25px rgba(0, 0, 0, 0.4);
+            backdrop-filter: blur(10px);
+            margin-bottom: 2rem;
+        }
+
+        .card-title {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            margin-bottom: 2rem;
+            font-size: 1.4rem;
+            color: #5865f2;
+        }
+
+        .card-title svg {
+            width: 28px;
+            height: 28px;
+        }
+
+        .form-group {
+            margin-bottom: 1.75rem;
+        }
+
+        label {
+            display: block;
+            margin-bottom: 0.75rem;
+            font-weight: 600;
+            color: #b0b0b0;
+            font-size: 1.1rem;
+        }
+
+        input, textarea, select {
+            width: 100%;
+            padding: 1rem 1.25rem;
+            background: rgba(0, 0, 0, 0.3);
+            border: 2px solid #333;
+            border-radius: 10px;
+            color: var(--text);
+            font-size: 1rem;
+            font-family: inherit;
+            transition: all 0.3s;
+        }
+
+        input:focus, textarea:focus, select:focus {
+            outline: none;
+            border-color: #5865f2;
+            box-shadow: 0 0 0 3px rgba(88, 101, 242, 0.2);
+        }
+
+        textarea {
+            min-height: 120px;
+            resize: vertical;
+        }
+
+        select {
+            cursor: pointer;
+        }
+
+        .file-upload {
+            position: relative;
+            overflow: hidden;
+            display: inline-block;
+            width: 100%;
+        }
+
+        .file-upload input[type="file"] {
+            position: absolute;
+            left: 0;
+            top: 0;
+            opacity: 0;
+            width: 100%;
+            height: 100%;
+            cursor: pointer;
+        }
+
+        .file-upload-label {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 1rem;
+            padding: 1.5rem;
+            background: rgba(88, 101, 242, 0.1);
+            border: 2px dashed #5865f2;
+            border-radius: 10px;
+            color: #5865f2;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+
+        .file-upload-label:hover {
+            background: rgba(88, 101, 242, 0.2);
+            border-color: #ff0000;
+        }
+
+        .preview-container {
+            display: flex;
+            gap: 1rem;
+            flex-wrap: wrap;
+            margin-top: 1rem;
+        }
+
+        .image-preview {
+            width: 100px;
+            height: 100px;
+            object-fit: cover;
+            border-radius: 8px;
+            border: 2px solid #333;
+        }
+
+        .flex {
+            display: flex;
+            gap: 1.25rem;
+            align-items: center;
+            justify-content: center;
+            margin-top: 1.5rem;
+            flex-wrap: wrap;
+        }
+
+        .btn {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.75rem;
+            padding: 1rem 2rem;
+            background: linear-gradient(135deg, #ff0000, #cc0000);
+            color: white;
+            border: none;
+            border-radius: 10px;
+            font-size: 1.1rem;
+            font-weight: 700;
+            cursor: pointer;
+            transition: all 0.3s;
+            text-decoration: none;
+            box-shadow: 0 5px 15px rgba(255, 0, 0, 0.3);
+        }
+
+        .btn:hover {
+            background: linear-gradient(135deg, #cc0000, #aa0000);
+            transform: translateY(-2px);
+            box-shadow: 0 8px 20px rgba(255, 0, 0, 0.4);
+        }
+
+        .btn-secondary {
+            background: linear-gradient(135deg, #5865f2, #4752c4);
+            box-shadow: 0 5px 15px rgba(88, 101, 242, 0.3);
+        }
+
+        .btn-secondary:hover {
+            background: linear-gradient(135deg, #4752c4, #3a45a8);
+            box-shadow: 0 8px 20px rgba(88, 101, 242, 0.4);
+        }
+
+        .btn-danger {
+            background: linear-gradient(135deg, #ff3333, #cc0000);
+            box-shadow: 0 5px 15px rgba(255, 51, 51, 0.3);
+        }
+
+        .btn-danger:hover {
+            background: linear-gradient(135deg, #cc0000, #aa0000);
+            box-shadow: 0 8px 20px rgba(255, 51, 51, 0.4);
+        }
+
+        .btn:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+            transform: none !important;
+        }
+
+        .btn svg {
+            width: 18px;
+            height: 18px;
+        }
+
+        .tooltip {
+            position: relative;
+            display: inline-block;
+            margin-left: 0.5rem;
+            cursor: help;
+        }
+
+        .tooltip svg {
+            color: #5865f2;
+            vertical-align: middle;
+        }
+
+        .tooltiptext {
+            visibility: hidden;
+            position: absolute;
+            bottom: 125%;
+            left: 50%;
+            transform: translateX(-50%);
+            background: rgba(26, 26, 26, 0.95);
+            color: var(--text);
+            padding: 1rem;
+            border-radius: 8px;
+            font-size: 0.9rem;
+            width: 250px;
+            text-align: center;
+            z-index: 100;
+            opacity: 0;
+            transition: opacity 0.3s;
+            border: 1px solid var(--border);
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.5);
+        }
+
+        .tooltip:hover .tooltiptext {
+            visibility: visible;
+            opacity: 1;
+        }
+
+        .stats {
+            margin-top: 2rem;
+            padding: 1.25rem;
+            background: rgba(0, 0, 0, 0.3);
+            border-radius: 10px;
+            font-family: 'Courier New', monospace;
+            font-size: 1rem;
+            border: 1px solid #333;
+        }
+
+        .stats div {
+            margin: 0.5rem 0;
+            padding: 0.5rem;
+            background: rgba(255, 0, 0, 0.1);
+            border-radius: 5px;
+            border-left: 3px solid #ff0000;
+        }
+
+        footer {
+            text-align: center;
+            margin-top: 3rem;
+            padding: 2rem;
+            color: var(--text-secondary);
+            font-size: 0.9rem;
+            border-top: 1px solid var(--border);
+            background: rgba(26, 26, 26, 0.5);
+            border-radius: 10px;
+        }
+
+        footer a {
+            color: #5865f2;
+            text-decoration: none;
+            font-weight: 600;
+            transition: color 0.3s;
+        }
+
+        footer a:hover {
+            color: #ff0000;
+            text-decoration: underline;
+        }
+
+        .toast-container {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            z-index: 1000;
+        }
+
+        .toast {
+            background: rgba(26, 26, 26, 0.95);
+            border-left: 5px solid #ff0000;
+            padding: 1.25rem;
+            margin-bottom: 0.75rem;
+            border-radius: 10px;
+            box-shadow: 0 8px 20px rgba(255, 0, 0, 0.3);
+            animation: slideIn 0.3s ease-out;
+            max-width: 320px;
+            border: 1px solid var(--border);
+            backdrop-filter: blur(10px);
+        }
+
+        .toast.success {
+            border-left-color: #00ff00;
+        }
+
+        .toast.error {
+            border-left-color: #ff3333;
+        }
+
+        @keyframes slideIn {
+            from {
+                transform: translateX(100%) translateY(-20px);
+                opacity: 0;
+            }
+            to {
+                transform: translateX(0) translateY(0);
+                opacity: 1;
+            }
+        }
+
+        .logo {
+            text-align: center;
+            margin-bottom: 1rem;
+        }
+
+        .logo-text {
+            font-size: 2.5rem;
+            font-weight: 900;
+            color: #ff0000;
+            text-shadow: 0 0 10px rgba(255, 0, 0, 0.5);
+            margin-bottom: 0.5rem;
+        }
+
+        .tagline {
+            color: #5865f2;
+            font-size: 1.1rem;
+        }
+
+        .powered-by {
+            font-size: 0.9rem;
+            color: #b0b0b0;
+            margin-top: 0.5rem;
+        }
+
+        .warning {
+            background: rgba(255, 0, 0, 0.1);
+            border: 1px solid #ff3333;
+            border-radius: 8px;
+            padding: 1rem;
+            margin-bottom: 1.5rem;
+            color: #ff9999;
+            font-size: 0.9rem;
+            text-align: center;
+        }
+
+        .option-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 1rem;
+            margin-top: 1rem;
+        }
+
+        .option-item {
+            background: rgba(88, 101, 242, 0.1);
+            border: 1px solid rgba(88, 101, 242, 0.3);
+            border-radius: 10px;
+            padding: 1rem;
+            text-align: center;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+
+        .option-item:hover {
+            background: rgba(88, 101, 242, 0.2);
+            border-color: #5865f2;
+            transform: translateY(-2px);
+        }
+
+        .option-item.active {
+            background: rgba(255, 0, 0, 0.2);
+            border-color: #ff0000;
+            color: #ff0000;
+        }
+
+        @media (max-width: 768px) {
+            .tabs-container {
+                overflow-x: auto;
+                flex-wrap: nowrap;
+            }
+            
+            .tab {
+                min-width: 120px;
+                padding: 0.75rem 1rem;
+                font-size: 0.9rem;
+            }
+            
+            h1 {
+                font-size: 2rem;
+            }
+            
+            .card {
+                padding: 1.5rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="toast-container" id="toastContainer"></div>
+
+    <div class="container">
+        <header>
+            <div class="logo">
+                <div class="logo-text">ZWEDAX SPAMMER</div>
+                <div class="tagline">Discord Webhook Yönetim Aracı</div>
+                <div class="powered-by">discord.gg/EZm8AZeNrB | discord:zwedax</div>
+            </div>
+            <h1>ZWEDAX WEBHOOK SPAMMER</h1>
+            <p class="subtitle">Webhook'ları spamla ve yönet</p>
+        </header>
+
+        <div class="warning">
+            ⚠️ UYARI: Sadece kendi webhook'larınızı veya izin verilen webhook'ları kullanın.
+        </div>
+
+        <!-- Ana Webhook URL Girişi -->
+        <div class="card">
+            <h2 class="card-title">
+                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13.828 10.172a4 4 0 00-5.656 0l-4 4a4 4 0 105.656 5.656l1.102-1.101m-.758-4.899a4 4 0 005.656 0l4-4a4 4 0 00-5.656-5.656l-1.1 1.1" />
+                </svg>
+                Webhook URL'si Girin
+            </h2>
+
+            <div class="form-group">
+                <label for="webhookUrl">Discord Webhook URL</label>
+                <input type="text" id="webhookUrl" placeholder="https://discord.com/api/webhooks/..." />
+            </div>
+
+            <div class="flex">
+                <button id="validateBtn" class="btn">
+                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" width="16" height="16">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+                    </svg>
+                    Webhook'u Doğrula
+                </button>
+            </div>
+        </div>
+
+        <!-- Sekmeler -->
+        <div class="tabs-container">
+            <div class="tab active" data-tab="spam">
+                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" width="20" height="20">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 19l9 2-9-18-9 18 9-2zm0 0v-8" />
+                </svg>
+                Spam Gönderimi
+            </div>
+            <div class="tab" data-tab="embed">
+                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" width="20" height="20">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
+                </svg>
+                Gömülü Mesaj
+            </div>
+            <div class="tab" data-tab="delete">
+                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" width="20" height="20">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+                </svg>
+                Webhook Sil
+            </div>
+            <div class="tab" data-tab="settings">
+                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" width="20" height="20">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z" />
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+                </svg>
+                Ayarlar
+            </div>
+            <div class="tab" data-tab="images">
+                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" width="20" height="20">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
+                </svg>
+                Resim Yükleme
+            </div>
+            <div class="tab" data-tab="massive">
+                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" width="20" height="20">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z" />
+                </svg>
+                Kitlesel Spam
+            </div>
+        </div>
+
+        <!-- Spam Gönderimi Sekmesi -->
+        <div class="tab-content active" id="spamTab">
+            <div class="card">
+                <h2 class="card-title">
+                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 19l9 2-9-18-9 18 9-2zm0 0v-8" />
+                    </svg>
+                    Normal Spam Gönderimi
+                </h2>
+
+                <div class="form-group">
+                    <label for="messageContent">Mesaj İçeriği</label>
+                    <textarea id="messageContent" placeholder="Spam mesajınızı buraya yazın..."></textarea>
+                </div>
+
+                <div class="form-group">
+                    <label for="spamType">Spam Türü</label>
+                    <select id="spamType">
+                        <option value="normal">Normal Spam</option>
+                        <option value="fast">Hızlı Spam</option>
+                        <option value="random">Rastgele Mesajlar</option>
+                    </select>
+                </div>
+
+                <div class="form-group">
+                    <label for="delay">
+                        Mesajlar Arası Gecikme (milisaniye)
+                        <span class="tooltip">
+                            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" width="14" height="14">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                            </svg>
+                            <span class="tooltiptext">
+                                1ms = saniyede 1000 mesaj<br>
+                                10ms = saniyede 100 mesaj<br>
+                                100ms = saniyede 10 mesaj
+                            </span>
+                        </span>
+                    </label>
+                    <input type="number" id="delay" placeholder="20" min="1" />
+                </div>
+
+                <div class="flex">
+                    <button id="startSpamBtn" class="btn">
+                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" width="16" height="16">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 19l9 2-9-18-9 18 9-2zm0 0v-8" />
+                        </svg>
+                        Spam Başlat
+                    </button>
+                    <button id="stopSpamBtn" class="btn btn-danger" style="display: none;">
+                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" width="16" height="16">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 10a1 1 0 011-1h4a1 1 0 011 1v4a1 1 0 01-1 1h-4a1 1 0 01-1-1v-4z" />
+                        </svg>
+                        Spam Durdur
+                    </button>
+                </div>
+
+                <div id="stats" class="stats"></div>
+            </div>
+        </div>
+
+        <!-- Gömülü Mesaj Sekmesi -->
+        <div class="tab-content" id="embedTab">
+            <div class="card">
+                <h2 class="card-title">
+                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
+                    </svg>
+                    Gömülü Mesaj Gönderimi
+                </h2>
+
+                <div class="form-group">
+                    <label for="embedTitle">Gömülü Başlık</label>
+                    <input type="text" id="embedTitle" placeholder="Gömülü mesaj başlığı..." />
+                </div>
+
+                <div class="form-group">
+                    <label for="embedDescription">Gömülü Açıklama</label>
+                    <textarea id="embedDescription" placeholder="Gömülü mesaj açıklaması..." rows="4"></textarea>
+                </div>
+
+                <div class="form-group">
+                    <label for="embedColor">Gömülü Renk</label>
+                    <input type="color" id="embedColor" value="#ff0000" />
+                </div>
+
+                <div class="form-group">
+                    <label for="embedImage">Gömülü Resim URL'si</label>
+                    <input type="text" id="embedImage" placeholder="Resim URL'si (opsiyonel)..." />
+                </div>
+
+                <div class="flex">
+                    <button id="sendEmbedBtn" class="btn btn-secondary">
+                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" width="16" height="16">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 19l9 2-9-18-9 18 9-2zm0 0v-8" />
+                        </svg>
+                        Gömülü Mesaj Gönder
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Webhook Silme Sekmesi -->
+        <div class="tab-content" id="deleteTab">
+            <div class="card">
+                <h2 class="card-title">
+                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+                    </svg>
+                    Webhook Silme
+                </h2>
+
+                <div class="warning">
+                    ⚠️ DİKKAT: Bu işlem webhook'u kalıcı olarak silecektir. Geri alınamaz!
+                </div>
+
+                <div class="form-group">
+                    <label>Silme Onayı</label>
+                    <div class="option-grid">
+                        <div class="option-item" id="confirmDelete">Silme İşlemini Onayla</div>
+                        <div class="option-item" id="cancelDelete">İptal Et</div>
+                    </div>
+                </div>
+
+                <div class="flex">
+                    <button id="deleteWebhookBtn" class="btn btn-danger" disabled>
+                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" width="16" height="16">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+                        </svg>
+                        Webhook'u Kalıcı Olarak Sil
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Ayarlar Sekmesi -->
+        <div class="tab-content" id="settingsTab">
+            <div class="card">
+                <h2 class="card-title">
+                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z" />
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+                    </svg>
+                    Ayarlar
+                </h2>
+
+                <div class="form-group">
+                    <label for="username">Kullanıcı Adı</label>
+                    <input type="text" id="username" placeholder="Webhook kullanıcı adı..." value="ZWEDAX Spammer" />
+                </div>
+
+                <div class="form-group">
+                    <label for="avatarUrl">Avatar URL'si</label>
+                    <input type="text" id="avatarUrl" placeholder="Avatar resmi URL'si..." />
+                </div>
+
+                <div class="form-group">
+                    <label for="autoSave">Otomatik Kaydet</label>
+                    <select id="autoSave">
+                        <option value="true">Açık</option>
+                        <option value="false">Kapalı</option>
+                    </select>
+                </div>
+
+                <div class="flex">
+                    <button id="saveSettingsBtn" class="btn">
+                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" width="16" height="16">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" />
+                        </svg>
+                        Ayarları Kaydet
+                    </button>
+                    <button id="resetSettingsBtn" class="btn btn-secondary">
+                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" width="16" height="16">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
+                        </svg>
+                        Sıfırla
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Resim Yükleme Sekmesi -->
+        <div class="tab-content" id="imagesTab">
+            <div class="card">
+                <h2 class="card-title">
+                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
+                    </svg>
+                    Resim Yükleme
+                </h2>
+
+                <div class="form-group">
+                    <label>Resim/GIF Yükleme</label>
+                    <div class="file-upload">
+                        <input type="file" id="imageUpload" accept="image/*" multiple>
+                        <label for="imageUpload" class="file-upload-label">
+                            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" width="20" height="20">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
+                            </svg>
+                            Resim/GIF Yükle (Birden Fazla Seçilebilir)
+                        </label>
+                    </div>
+                    <div id="imagePreviews" class="preview-container"></div>
+                </div>
+
+                <div class="form-group">
+                    <label for="imageSpamType">Resimli Spam Türü</label>
+                    <select id="imageSpamType">
+                        <option value="random">Rastgele Resimler</option>
+                        <option value="sequence">Sırayla Resimler</option>
+                        <option value="all">Tüm Resimler</option>
+                    </select>
+                </div>
+
+                <div class="flex">
+                    <button id="clearImagesBtn" class="btn btn-secondary">
+                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" width="16" height="16">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+                        </svg>
+                        Resimleri Temizle
+                    </button>
+                    <button id="testImageBtn" class="btn">
+                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" width="16" height="16">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 19l9 2-9-18-9 18 9-2zm0 0v-8" />
+                        </svg>
+                        Test Gönderimi Yap
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Kitlesel Spam Sekmesi -->
+        <div class="tab-content" id="massiveTab">
+            <div class="card">
+                <h2 class="card-title">
+                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z" />
+                    </svg>
+                    Kitlesel Spam (Ultra Hızlı)
+                </h2>
+
+                <div class="warning">
+                    ⚠️ DİKKAT: Bu mod çok hızlı spam yapar. Dikkatli kullanın!
+                </div>
+
+                <div class="form-group">
+                    <label for="massiveMessage">Mesaj İçeriği</label>
+                    <textarea id="massiveMessage" placeholder="Kitlesel spam mesajınız..."></textarea>
+                </div>
+
+                <div class="form-group">
+                    <label for="massiveDelay">Ultra Hızlı Gecikme (ms)</label>
+                    <input type="number" id="massiveDelay" placeholder="1" min="1" max="10" value="1" />
+                    <small style="color: #ff6666; display: block; margin-top: 0.5rem;">1-10ms arası önerilir (Çok hızlı!)</small>
+                </div>
+
+                <div class="form-group">
+                    <label for="massiveCount">Toplam Mesaj Sayısı</label>
+                    <input type="number" id="massiveCount" placeholder="1000" min="1" max="10000" value="1000" />
+                </div>
+
+                <div class="flex">
+                    <button id="startMassiveBtn" class="btn btn-danger">
+                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" width="16" height="16">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z" />
+                        </svg>
+                        Kitlesel Spam Başlat
+                    </button>
+                    <button id="stopMassiveBtn" class="btn btn-secondary" style="display: none;">
+                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" width="16" height="16">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 10a1 1 0 011-1h4a1 1 0 011 1v4a1 1 0 01-1 1h-4a1 1 0 01-1-1v-4z" />
+                        </svg>
+                        Durdur
+                    </button>
+                </div>
+
+                <div id="massiveStats" class="stats" style="display: none;">
+                    <div>Kitlesel Spam İstatistikleri:</div>
+                    <div id="massiveStatsContent"></div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <footer>
+        <p><a href="https://discord.gg/EZm8AZeNrB">Discord Sunucumuza Katılın</a></p>
+        <p>Geliştiren: <a href="#">ZWEDAX Development</a></p>
+        <p style="margin-top: 1rem; font-size: 0.8rem; color: #5865f2;">© 2024 ZWEDAX Webhook Spammer v3.0</p>
+    </footer>
+
+    <script>
+        class ZwedaxWebhookManager {
+            constructor() {
+                this.isSpamming = false;
+                this.isMassiveSpamming = false;
+                this.spamInterval = null;
+                this.massiveInterval = null;
+                this.messageCount = 0;
+                this.massiveMessageCount = 0;
+                this.startTime = null;
+                this.massiveStartTime = null;
+                this.totalMessages = 0;
+                this.uploadedImages = [];
+                this.currentTab = 'spam';
+                this.imageIndex = 0;
+                
+                this.initElements();
+                this.bindEvents();
+                this.loadFromStorage();
+                this.showTab('spam');
+            }
+
+            initElements() {
+                // Inputs - Spam Tab
+                this.webhookUrlInput = document.getElementById('webhookUrl');
+                this.messageContentInput = document.getElementById('messageContent');
+                this.delayInput = document.getElementById('delay');
+                this.spamTypeInput = document.getElementById('spamType');
+                
+                // Inputs - Images Tab
+                this.imageUploadInput = document.getElementById('imageUpload');
+                this.imagePreviewsDiv = document.getElementById('imagePreviews');
+                this.imageSpamTypeInput = document.getElementById('imageSpamType');
+                
+                // Inputs - Embed Tab
+                this.embedTitleInput = document.getElementById('embedTitle');
+                this.embedDescriptionInput = document.getElementById('embedDescription');
+                this.embedColorInput = document.getElementById('embedColor');
+                this.embedImageInput = document.getElementById('embedImage');
+                
+                // Inputs - Massive Tab
+                this.massiveMessageInput = document.getElementById('massiveMessage');
+                this.massiveDelayInput = document.getElementById('massiveDelay');
+                this.massiveCountInput = document.getElementById('massiveCount');
+                
+                // Inputs - Settings Tab
+                this.usernameInput = document.getElementById('username');
+                this.avatarUrlInput = document.getElementById('avatarUrl');
+                this.autoSaveInput = document.getElementById('autoSave');
+                
+                // Buttons
+                this.validateBtn = document.getElementById('validateBtn');
+                this.startSpamBtn = document.getElementById('startSpamBtn');
+                this.stopSpamBtn = document.getElementById('stopSpamBtn');
+                this.sendEmbedBtn = document.getElementById('sendEmbedBtn');
+                this.deleteWebhookBtn = document.getElementById('deleteWebhookBtn');
+                this.saveSettingsBtn = document.getElementById('saveSettingsBtn');
+                this.resetSettingsBtn = document.getElementById('resetSettingsBtn');
+                this.clearImagesBtn = document.getElementById('clearImagesBtn');
+                this.testImageBtn = document.getElementById('testImageBtn');
+                this.startMassiveBtn = document.getElementById('startMassiveBtn');
+                this.stopMassiveBtn = document.getElementById('stopMassiveBtn');
+                
+                // Tabs
+                this.tabs = document.querySelectorAll('.tab');
+                this.tabContents = document.querySelectorAll('.tab-content');
+                
+                // Other elements
+                this.statsElement = document.getElementById('stats');
+                this.massiveStatsElement = document.getElementById('massiveStats');
+                this.massiveStatsContent = document.getElementById('massiveStatsContent');
+                this.toastContainer = document.getElementById('toastContainer');
+                this.confirmDeleteBtn = document.getElementById('confirmDelete');
+                this.cancelDeleteBtn = document.getElementById('cancelDelete');
+            }
+
+            bindEvents() {
+                // Webhook validation
+                this.validateBtn.addEventListener('click', () => this.validateWebhook());
+                this.webhookUrlInput.addEventListener('keypress', (e) => {
+                    if (e.key === 'Enter') this.validateWebhook();
+                });
+                
+                // Spam controls
+                this.startSpamBtn.addEventListener('click', () => this.startSpamming());
+                this.stopSpamBtn.addEventListener('click', () => this.stopSpamming());
+                
+                // Massive spam controls
+                this.startMassiveBtn.addEventListener('click', () => this.startMassiveSpamming());
+                this.stopMassiveBtn.addEventListener('click', () => this.stopMassiveSpamming());
+                
+                // Embed controls
+                this.sendEmbedBtn.addEventListener('click', () => this.sendEmbedMessage());
+                
+                // Delete controls
+                this.deleteWebhookBtn.addEventListener('click', () => this.deleteWebhook());
+                this.confirmDeleteBtn.addEventListener('click', () => {
+                    this.deleteWebhookBtn.disabled = false;
+                    this.confirmDeleteBtn.classList.add('active');
+                    this.cancelDeleteBtn.classList.remove('active');
+                    this.showToast('Silme işlemi onaylandı. Dikkatli olun!', 'error');
+                });
+                this.cancelDeleteBtn.addEventListener('click', () => {
+                    this.deleteWebhookBtn.disabled = true;
+                    this.cancelDeleteBtn.classList.add('active');
+                    this.confirmDeleteBtn.classList.remove('active');
+                    this.showToast('Silme işlemi iptal edildi.', 'success');
+                });
+                
+                // Settings controls
+                this.saveSettingsBtn.addEventListener('click', () => this.saveSettings());
+                this.resetSettingsBtn.addEventListener('click', () => this.resetSettings());
+                
+                // Image controls
+                this.imageUploadInput.addEventListener('change', (e) => this.handleImageUpload(e));
+                this.clearImagesBtn.addEventListener('click', () => this.clearImages());
+                this.testImageBtn.addEventListener('click', () => this.testImageSpam());
+                
+                // Tab navigation
+                this.tabs.forEach(tab => {
+                    tab.addEventListener('click', () => {
+                        const tabName = tab.dataset.tab;
+                        this.showTab(tabName);
+                        this.tabs.forEach(t => t.classList.remove('active'));
+                        tab.classList.add('active');
+                    });
+                });
+                
+                // Auto-save
+                [this.webhookUrlInput, this.messageContentInput, this.delayInput, 
+                 this.usernameInput, this.avatarUrlInput].forEach(input => {
+                    input.addEventListener('input', () => this.autoSave());
+                });
+            }
+
+            showTab(tabName) {
+                this.currentTab = tabName;
+                this.tabContents.forEach(content => {
+                    content.classList.remove('active');
+                    if (content.id === tabName + 'Tab') {
+                        content.classList.add('active');
+                    }
+                });
+            }
+
+            async validateWebhook() {
+                const url = this.webhookUrlInput.value.trim();
+                
+                if (!url) {
+                    this.showToast('Lütfen bir webhook URL\'si girin', 'error');
+                    return;
+                }
+
+                if (!url.includes('discord.com/api/webhooks/')) {
+                    this.showToast('Geçersiz Discord webhook URL\'si', 'error');
+                    return;
+                }
+
+                this.validateBtn.innerHTML = `
+                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" width="16" height="16">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z" />
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+                    </svg>
+                    Doğrulanıyor...
+                `;
+                this.validateBtn.disabled = true;
+
+                try {
+                    const response = await fetch(url);
+                    
+                    if (response.status === 200) {
+                        this.showToast('Webhook başarıyla doğrulandı!', 'success');
+                        this.saveToStorage();
+                    } else if (response.status === 404) {
+                        this.showToast('Webhook bulunamadı (zaten silinmiş olabilir)', 'error');
+                    } else {
+                        this.showToast('Webhook doğrulama başarısız', 'error');
+                    }
+                } catch (error) {
+                    this.showToast('Webhook doğrulanırken hata oluştu', 'error');
+                    console.error('Doğrulama hatası:', error);
+                } finally {
+                    this.validateBtn.innerHTML = `
+                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" width="16" height="16">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+                        </svg>
+                        Webhook'u Doğrula
+                    `;
+                    this.validateBtn.disabled = false;
+                }
+            }
+
+            async startSpamming() {
+                const webhookUrl = this.webhookUrlInput.value.trim();
+                let message = this.messageContentInput.value.trim() || 'ZWEDAX Spammer ile gönderildi!';
+                const delay = parseInt(this.delayInput.value) || 20;
+                const spamType = this.spamTypeInput.value;
+
+                if (!webhookUrl) {
+                    this.showToast('Lütfen bir webhook URL\'si girin', 'error');
+                    return;
+                }
+
+                if (delay < 1) {
+                    this.showToast('Gecikme en az 1ms olmalıdır', 'error');
+                    return;
+                }
+
+                let adjustedDelay = delay;
+                switch(spamType) {
+                    case 'fast':
+                        adjustedDelay = Math.max(10, delay);
+                        break;
+                    case 'random':
+                        adjustedDelay = () => Math.floor(Math.random() * (delay - 50 + 1)) + 50;
+                        break;
+                }
+
+                this.isSpamming = true;
+                this.messageCount = 0;
+                this.startTime = Date.now();
+                
+                this.startSpamBtn.style.display = 'none';
+                this.stopSpamBtn.style.display = 'inline-flex';
+                
+                this.showToast(`Normal spam başlatıldı - ${delay}ms gecikme`, 'success');
+
+                const spamFunction = async () => {
+                    try {
+                        const payload = {
+                            content: spamType === 'random' ? this.generateRandomMessage() : message,
+                            username: this.usernameInput.value || 'ZWEDAX Spammer',
+                        };
+
+                        if (this.avatarUrlInput.value.trim()) {
+                            payload.avatar_url = this.avatarUrlInput.value.trim();
+                        }
+
+                        await fetch(webhookUrl, {
+                            method: 'POST',
+                            headers: {
+                                'Content-Type': 'application/json',
+                            },
+                            body: JSON.stringify(payload)
+                        });
+                        
+                        this.messageCount++;
+                        this.totalMessages++;
+                        this.updateStats();
+                        
+                    } catch (error) {
+                        console.error('Mesaj gönderme hatası:', error);
+                    }
+                };
+
+                if (typeof adjustedDelay === 'function') {
+                    this.spamInterval = setInterval(async () => {
+                        await spamFunction();
+                        const nextDelay = adjustedDelay();
+                        clearInterval(this.spamInterval);
+                        this.spamInterval = setInterval(spamFunction, nextDelay);
+                    }, adjustedDelay());
+                } else {
+                    this.spamInterval = setInterval(spamFunction, adjustedDelay);
+                }
+            }
+
+            async startMassiveSpamming() {
+                const webhookUrl = this.webhookUrlInput.value.trim();
+                const message = this.massiveMessageInput.value.trim() || 'ZWEDAX KİTLESEL SPAM AKTİF! 💣';
+                const delay = Math.max(1, parseInt(this.massiveDelayInput.value) || 1);
+                const maxCount = parseInt(this.massiveCountInput.value) || 1000;
+
+                if (!webhookUrl) {
+                    this.showToast('Lütfen bir webhook URL\'si girin', 'error');
+                    return;
+                }
+
+                if (delay < 1 || delay > 100) {
+                    this.showToast('Gecikme 1-100ms arası olmalıdır', 'error');
+                    return;
+                }
+
+                this.isMassiveSpamming = true;
+                this.massiveMessageCount = 0;
+                this.massiveStartTime = Date.now();
+                
+                this.startMassiveBtn.style.display = 'none';
+                this.stopMassiveBtn.style.display = 'inline-flex';
+                this.massiveStatsElement.style.display = 'block';
+                
+                this.showToast(`Kitlesel spam başlatıldı - ${delay}ms gecikme ile ${maxCount} mesaj`, 'success');
+
+                this.massiveInterval = setInterval(async () => {
+                    if (this.massiveMessageCount >= maxCount) {
+                        this.stopMassiveSpamming();
+                        this.showToast(`Kitlesel spam tamamlandı - ${maxCount} mesaj gönderildi`, 'success');
+                        return;
+                    }
+
+                    try {
+                        const payload = {
+                            content: message,
+                            username: this.usernameInput.value || 'ZWEDAX Mass Spammer',
+                        };
+
+                        if (this.avatarUrlInput.value.trim()) {
+                            payload.avatar_url = this.avatarUrlInput.value.trim();
+                        }
+
+                        await fetch(webhookUrl, {
+                            method: 'POST',
+                            headers: {
+                                'Content-Type': 'application/json',
+                            },
+                            body: JSON.stringify(payload)
+                        });
+                        
+                        this.massiveMessageCount++;
+                        this.totalMessages++;
+                        this.updateMassiveStats();
+                        
+                    } catch (error) {
+                        console.error('Kitlesel mesaj gönderme hatası:', error);
+                    }
+                }, delay);
+            }
+
+            stopSpamming() {
+                if (this.spamInterval) {
+                    clearInterval(this.spamInterval);
+                    this.spamInterval = null;
+                }
+                
+                this.isSpamming = false;
+                this.startSpamBtn.style.display = 'inline-flex';
+                this.stopSpamBtn.style.display = 'none';
+                
+                const duration = ((Date.now() - this.startTime) / 1000).toFixed(1);
+                this.showToast(`Normal spam durduruldu - ${this.messageCount} mesaj ${duration}s içinde gönderildi`, 'success');
+            }
+
+            stopMassiveSpamming() {
+                if (this.massiveInterval) {
+                    clearInterval(this.massiveInterval);
+                    this.massiveInterval = null;
+                }
+                
+                this.isMassiveSpamming = false;
+                this.startMassiveBtn.style.display = 'inline-flex';
+                this.stopMassiveBtn.style.display = 'none';
+                
+                const duration = ((Date.now() - this.massiveStartTime) / 1000).toFixed(1);
+                this.showToast(`Kitlesel spam durduruldu - ${this.massiveMessageCount} mesaj ${duration}s içinde gönderildi`, 'success');
+            }
+
+            async sendEmbedMessage() {
+                const webhookUrl = this.webhookUrlInput.value.trim();
+                
+                if (!webhookUrl) {
+                    this.showToast('Lütfen bir webhook URL\'si girin', 'error');
+                    return;
+                }
+
+                const embed = {
+                    title: this.embedTitleInput.value.trim() || 'ZWEDAX Embed Mesajı',
+                    description: this.embedDescriptionInput.value.trim() || 'Bu bir gömülü mesaj örneğidir',
+                    color: parseInt(this.embedColorInput.value.replace('#', ''), 16),
+                    timestamp: new Date().toISOString()
+                };
+
+                if (this.embedImageInput.value.trim()) {
+                    embed.image = { url: this.embedImageInput.value.trim() };
+                }
+
+                this.sendEmbedBtn.disabled = true;
+                this.sendEmbedBtn.innerHTML = 'Gönderiliyor...';
+
+                try {
+                    await fetch(webhookUrl, {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                        },
+                        body: JSON.stringify({
+                            username: this.usernameInput.value || 'ZWEDAX Spammer',
+                            avatar_url: this.avatarUrlInput.value.trim() || '',
+                            embeds: [embed]
+                        })
+                    });
+
+                    this.showToast('Gömülü mesaj başarıyla gönderildi!', 'success');
+                } catch (error) {
+                    this.showToast('Gömülü mesaj gönderilemedi', 'error');
+                    console.error('Embed gönderme hatası:', error);
+                } finally {
+                    this.sendEmbedBtn.disabled = false;
+                    this.sendEmbedBtn.innerHTML = 'Gömülü Mesaj Gönder';
+                }
+            }
+
+            async deleteWebhook() {
+                const webhookUrl = this.webhookUrlInput.value.trim();
+                
+                if (!webhookUrl) {
+                    this.showToast('Lütfen bir webhook URL\'si girin', 'error');
+                    return;
+                }
+
+                if (!confirm('⚠️ SON UYARI:\n\nBu webhook kalıcı olarak silinecektir.\n\nBu işlem geri alınamaz!\n\nDevam etmek istiyor musunuz?')) {
+                    return;
+                }
+
+                this.deleteWebhookBtn.disabled = true;
+                this.deleteWebhookBtn.innerHTML = 'Siliniyor...';
+
+                try {
+                    const response = await fetch(webhookUrl, {
+                        method: 'DELETE'
+                    });
+
+                    if (response.status === 204) {
+                        this.showToast('Webhook başarıyla silindi!', 'success');
+                        this.webhookUrlInput.value = '';
+                        this.deleteWebhookBtn.disabled = true;
+                        this.confirmDeleteBtn.classList.remove('active');
+                        this.cancelDeleteBtn.classList.remove('active');
+                        localStorage.removeItem('zwedaxData');
+                    } else {
+                        this.showToast('Webhook silinemedi', 'error');
+                    }
+                } catch (error) {
+                    this.showToast('Webhook silinirken hata oluştu', 'error');
+                    console.error('Silme hatası:', error);
+                } finally {
+                    this.deleteWebhookBtn.disabled = false;
+                    this.deleteWebhookBtn.innerHTML = 'Webhook\'u Kalıcı Olarak Sil';
+                }
+            }
+
+            handleImageUpload(event) {
+                const files = event.target.files;
+                this.imagePreviewsDiv.innerHTML = '';
+                this.uploadedImages = [];
+                this.imageIndex = 0;
+
+                for (let i = 0; i < files.length; i++) {
+                    const file = files[i];
+                    if (file.type.startsWith('image/')) {
+                        const reader = new FileReader();
+                        reader.onload = (e) => {
+                            const img = document.createElement('img');
+                            img.src = e.target.result;
+                            img.className = 'image-preview';
+                            img.title = file.name;
+                            this.imagePreviewsDiv.appendChild(img);
+                            
+                            this.uploadedImages.push(e.target.result);
+                        };
+                        reader.readAsDataURL(file);
+                    }
+                }
+
+                if (files.length > 0) {
+                    this.showToast(`${files.length} resim yüklendi`, 'success');
+                }
+            }
+
+            clearImages() {
+                this.uploadedImages = [];
+                this.imagePreviewsDiv.innerHTML = '';
+                this.imageIndex = 0;
+                this.showToast('Tüm resimler temizlendi', 'success');
+            }
+
+            async testImageSpam() {
+                const webhookUrl = this.webhookUrlInput.value.trim();
+                
+                if (!webhookUrl) {
+                    this.showToast('Lütfen bir webhook URL\'si girin', 'error');
+                    return;
+                }
+
+                if (this.uploadedImages.length === 0) {
+                    this.showToast('Önce resim yükleyin', 'error');
+                    return;
+                }
+
+                this.testImageBtn.disabled = true;
+                this.testImageBtn.innerHTML = 'Test ediliyor...';
+
+                try {
+                    const imageUrl = this.uploadedImages[0];
+                    
+                    await fetch(webhookUrl, {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                        },
+                        body: JSON.stringify({
+                            content: 'Test resim gönderimi 📸',
+                            username: this.usernameInput.value || 'ZWEDAX Spammer',
+                            avatar_url: this.avatarUrlInput.value.trim() || ''
+                        })
+                    });
+
+                    this.showToast('Test resim gönderimi başarılı!', 'success');
+                } catch (error) {
+                    this.showToast('Test gönderimi başarısız', 'error');
+                    console.error('Test hatası:', error);
+                } finally {
+                    this.testImageBtn.disabled = false;
+                    this.testImageBtn.innerHTML = 'Test Gönderimi Yap';
+                }
+            }
+
+            generateRandomMessage() {
+                const messages = [
+                    'ZWEDAX Spammer aktif! 🔥',
+                    'Webhook spam devam ediyor... 💣',
+                    'Bu bir test mesajıdır 📝',
+                    'Spam attack in progress ⚡',
+                    'Discord webhook spam tool 🛠️',
+                    'Güçlü spam aracı çalışıyor 🚀',
+                    'Bunu beğendin mi? 😎',
+                    'Spam spam spam! 🔄',
+                    'Webhook yönetimi kolay 🎯',
+                    'ZWEDAX Development ✨'
+                ];
+                return messages[Math.floor(Math.random() * messages.length)];
+            }
+
+            updateStats() {
+                if (!this.startTime) return;
+
+                const now = Date.now();
+                const elapsed = (now - this.startTime) / 1000;
+                const messagesPerSecond = this.messageCount / elapsed;
+
+                this.statsElement.innerHTML = `
+                    <div>⏱️ Geçen Süre: ${elapsed.toFixed(1)}s</div>
+                    <div>📨 Gönderilen Mesaj: ${this.messageCount}</div>
+                    <div>🚀 Gönderim Hızı: ${messagesPerSecond.toFixed(1)} mesaj/saniye</div>
+                    <div>⏳ Gecikme: ${this.delayInput.value || 20}ms</div>
+                    <div>💣 Toplam Gönderim: ${this.totalMessages} mesaj</div>
+                `;
+            }
+
+            updateMassiveStats() {
+                if (!this.massiveStartTime) return;
+
+                const now = Date.now();
+                const elapsed = (now - this.massiveStartTime) / 1000;
+                const messagesPerSecond = this.massiveMessageCount / elapsed;
+                const progress = (this.massiveMessageCount / parseInt(this.massiveCountInput.value || 1000)) * 100;
+
+                this.massiveStatsContent.innerHTML = `
+                    <div>⏱️ Geçen Süre: ${elapsed.toFixed(1)}s</div>
+                    <div>📨 Gönderilen Mesaj: ${this.massiveMessageCount}/${this.massiveCountInput.value || 1000}</div>
+                    <div>📊 İlerleme: ${progress.toFixed(1)}%</div>
+                    <div>🚀 Gönderim Hızı: ${messagesPerSecond.toFixed(1)} mesaj/saniye</div>
+                    <div>⏳ Gecikme: ${this.massiveDelayInput.value || 1}ms</div>
+                `;
+            }
+
+            showToast(message, type = 'info') {
+                const toast = document.createElement('div');
+                toast.className = `toast ${type}`;
+                toast.innerHTML = `
+                    <div style="font-weight: 700; margin-bottom: 0.5rem; color: ${type === 'success' ? '#00ff00' : type === 'error' ? '#ff3333' : '#5865f2'}">
+                        ${type === 'success' ? '✅ BAŞARILI:' : type === 'error' ? '❌ HATA:' : 'ℹ️ BİLGİ:'}
+                    </div>
+                    <div>${message}</div>
+                `;
+
+                this.toastContainer.appendChild(toast);
+
+                setTimeout(() => {
+                    toast.style.opacity = '0';
+                    toast.style.transform = 'translateX(100%) translateY(-20px)';
+                    setTimeout(() => toast.remove(), 300);
+                }, 5000);
+            }
+
+            saveSettings() {
+                const settings = {
+                    username: this.usernameInput.value,
+                    avatarUrl: this.avatarUrlInput.value,
+                    autoSave: this.autoSaveInput.value
+                };
+                localStorage.setItem('zwedaxSettings', JSON.stringify(settings));
+                this.showToast('Ayarlar kaydedildi!', 'success');
+            }
+
+            resetSettings() {
+                this.usernameInput.value = 'ZWEDAX Spammer';
+                this.avatarUrlInput.value = '';
+                this.autoSaveInput.value = 'true';
+                this.showToast('Ayarlar sıfırlandı!', 'success');
+            }
+
+            autoSave() {
+                if (this.autoSaveInput.value === 'true') {
+                    this.saveToStorage();
+                }
+            }
+
+            saveToStorage() {
+                const data = {
+                    webhookUrl: this.webhookUrlInput.value,
+                    messageContent: this.messageContentInput.value,
+                    delay: this.delayInput.value,
+                    spamType: this.spamTypeInput.value,
+                    username: this.usernameInput.value,
+                    avatarUrl: this.avatarUrlInput.value,
+                    currentTab: this.currentTab,
+                    massiveMessage: this.massiveMessageInput.value,
+                    massiveDelay: this.massiveDelayInput.value,
+                    massiveCount: this.massiveCountInput.value
+                };
+                localStorage.setItem('zwedaxData', JSON.stringify(data));
+            }
+
+            loadFromStorage() {
+                // Load main data
+                const saved = localStorage.getItem('zwedaxData');
+                if (saved) {
+                    try {
+                        const data = JSON.parse(saved);
+                        this.webhookUrlInput.value = data.webhookUrl || '';
+                        this.messageContentInput.value = data.messageContent || '';
+                        this.delayInput.value = data.delay || '20';
+                        this.spamTypeInput.value = data.spamType || 'normal';
+                        this.usernameInput.value = data.username || 'ZWEDAX Spammer';
+                        this.avatarUrlInput.value = data.avatarUrl || '';
+                        this.currentTab = data.currentTab || 'spam';
+                        this.massiveMessageInput.value = data.massiveMessage || '';
+                        this.massiveDelayInput.value = data.massiveDelay || '1';
+                        this.massiveCountInput.value = data.massiveCount || '1000';
+                        
+                        this.showTab(this.currentTab);
+                        this.tabs.forEach(tab => {
+                            tab.classList.remove('active');
+                            if (tab.dataset.tab === this.currentTab) {
+                                tab.classList.add('active');
+                            }
+                        });
+                    } catch (error) {
+                        console.error('Kayıtlı veri yüklenirken hata:', error);
+                    }
+                }
+
+                // Load settings
+                const savedSettings = localStorage.getItem('zwedaxSettings');
+                if (savedSettings) {
+                    try {
+                        const settings = JSON.parse(savedSettings);
+                        this.usernameInput.value = settings.username || 'ZWEDAX Spammer';
+                        this.avatarUrlInput.value = settings.avatarUrl || '';
+                        this.autoSaveInput.value = settings.autoSave || 'true';
+                    } catch (error) {
+                        console.error('Ayarlar yüklenirken hata:', error);
+                    }
+                }
+            }
+        }
+
+        // Uygulamayı başlat
+        document.addEventListener('DOMContentLoaded', () => {
+            window.webhookManager = new ZwedaxWebhookManager();
+        });
+    </script>
+</body>
+</html>
